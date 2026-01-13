@@ -593,6 +593,20 @@ async function addItemRow(jobId){
 // --------------------
 // Photos (storage bucket job-photos + table job_photos)
 // --------------------
+
+// Fallback: if bucket isn't public or publicUrl fails, swap to a signed URL.
+window.__fixImg = async (imgEl)=>{
+  try{
+    const path = imgEl?.getAttribute('data-path');
+    if(!path) return;
+    const { data, error } = await supabase.storage.from('job-photos').createSignedUrl(path, 60*60);
+    if(error || !data?.signedUrl) return;
+    // prevent loop
+    imgEl.onerror = null;
+    imgEl.src = data.signedUrl;
+  } catch {}
+};
+
 function photoPublicUrl(path){
   try{
     return supabase.storage.from('job-photos').getPublicUrl(path).data.publicUrl;
@@ -625,7 +639,7 @@ function renderPhotosBlock(job){
             <p class="text-slate-200 font-medium">Ausweis Foto</p>
           </div>
           <div class="mt-3">
-            ${idUrl ? `<img src="${idUrl}" class="w-full h-48 object-cover rounded-lg border border-slate-700">` : `<p class="text-slate-500 text-sm">Noch kein Ausweis-Foto</p>`}
+            ${idUrl ? `<img data-path="${idPhoto ? idPhoto.path : ""}" onerror="window.__fixImg(this)" src="${idUrl}" class="w-full h-48 object-cover rounded-lg border border-slate-700">` : `<p class="text-slate-500 text-sm">Noch kein Ausweis-Foto</p>`}
           </div>
           <div class="mt-3">
             <input id="id-upload" type="file" accept="image/*" capture="environment" class="block w-full text-slate-300 text-sm">
@@ -967,6 +981,33 @@ async function deleteJob(){
 // --------------------
 // PDF (print-to-PDF, beautiful layout) + QR
 // --------------------
+
+async function fetchAsDataUrl(url){
+  const r = await fetch(url, { cache: 'no-store' });
+  if(!r.ok) throw new Error('fetch failed');
+  const blob = await r.blob();
+  return await new Promise((resolve, reject)=>{
+    const fr = new FileReader();
+    fr.onload = ()=> resolve(fr.result);
+    fr.onerror = ()=> reject(new Error('file read failed'));
+    fr.readAsDataURL(blob);
+  });
+}
+
+async function photoDataUrl(path){
+  if(!path) return null;
+  // Try public URL first
+  let pub = null;
+  try{ pub = photoPublicUrl(path); } catch {}
+  if(pub){
+    try{ return await fetchAsDataUrl(pub); } catch {}
+  }
+  // Fallback to signed URL
+  const { data, error } = await supabase.storage.from('job-photos').createSignedUrl(path, 60*60);
+  if(error || !data?.signedUrl) return null;
+  try{ return await fetchAsDataUrl(data.signedUrl); } catch { return null; }
+}
+
 function escapeHtml(s){
   return String(s ?? '')
     .replaceAll('&','&amp;')
@@ -989,8 +1030,12 @@ async function exportPdf(jobId){
   const signature = getSignature(jobId);
 
   const idPhoto = photos.find(p=>p.kind==='id');
-  const idUrl = idPhoto ? photoPublicUrl(idPhoto.path) : null;
-  const general = photos.filter(p=>p.kind!=='id').slice(0,6).map(p=>photoPublicUrl(p.path)).filter(Boolean);
+  const idDataUrl = idPhoto ? await photoDataUrl(idPhoto.path) : null;
+  const generalData = [];
+  for(const p of photos.filter(p=>p.kind!=='id').slice(0,6)){
+    const d = await photoDataUrl(p.path);
+    if(d) generalData.push(d);
+  }
 
   const itemsTotal = items.reduce((s,it)=> s + (Number(it.qty||0) * Number(it.unit_price||0)), 0);
 
@@ -1099,7 +1144,7 @@ async function exportPdf(jobId){
 
       <div class="card">
         <div class="val">Dokumente / Fotos</div>
-        ${idUrl ? `<div class="muted" style="margin-top:6px;">Ausweis Foto:</div><img src="${idUrl}" style="width:320px;height:200px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;margin-top:6px;"/>` : `<div class="muted" style="margin-top:6px;">Kein Ausweis Foto</div>`}
+        ${idDataUrl ? `<div class="muted" style="margin-top:6px;">Ausweis Foto:</div><img data-path="${idPhoto ? idPhoto.path : ""}" onerror="window.__fixImg(this)" src="${idDataUrl}" style="width:320px;height:200px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;margin-top:6px;"/>` : `<div class="muted" style="margin-top:6px;">Kein Ausweis Foto</div>`}
         ${general.length ? `<div class="muted" style="margin-top:10px;">Fahrzeug / Schäden:</div><div class="photos">${general.map(u=>`<img src="${u}"/>`).join('')}</div>` : ''}
       </div>
 
