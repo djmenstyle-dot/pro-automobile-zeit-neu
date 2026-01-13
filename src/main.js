@@ -1145,7 +1145,7 @@ async function exportPdf(jobId){
       <div class="card">
         <div class="val">Dokumente / Fotos</div>
         ${idDataUrl ? `<div class="muted" style="margin-top:6px;">Ausweis Foto:</div><img data-path="${idPhoto ? idPhoto.path : ""}" onerror="window.__fixImg(this)" src="${idDataUrl}" style="width:320px;height:200px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;margin-top:6px;"/>` : `<div class="muted" style="margin-top:6px;">Kein Ausweis Foto</div>`}
-        ${general.length ? `<div class="muted" style="margin-top:10px;">Fahrzeug / Schäden:</div><div class="photos">${general.map(u=>`<img src="${u}"/>`).join('')}</div>` : ''}
+        ${generalData.length ? `<div class="muted" style="margin-top:10px;">Fahrzeug / Schäden:</div><div class="photos">${generalData.map(u=>`<img src="${u}"/>`).join('')}</div>` : ''}
       </div>
 
       <div class="card sig">
