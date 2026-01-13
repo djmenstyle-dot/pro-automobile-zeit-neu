@@ -1,0 +1,19 @@
+{
+  "name": "pro-automobile-zeit",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "qrcode": "^1.5.4",
+    "jspdf": "^2.5.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
