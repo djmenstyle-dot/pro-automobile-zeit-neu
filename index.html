@@ -1,89 +1,381 @@
-<!DOCTYPE html>
-<html lang="de">
+<title>PA</title>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
+<!-- PWA / App -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/icon-192x192.png">
   <title>PA</title>
 
-  <!-- PWA -->
+<meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/icon-192x192.png">
 
+<!-- iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="PA">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="PA">
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- App Styles -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <!-- diese 2 waren bei dir NACH dem head: -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* dein komplettes CSS bleibt hier drin */
+  </style>
+</head>
+
     body {
       box-sizing: border-box;
       font-family: 'DM Sans', sans-serif;
     }
-
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
     }
-
     .custom-scrollbar::-webkit-scrollbar-track {
       background: rgba(0,0,0,0.1);
       border-radius: 3px;
     }
-
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: rgba(0,0,0,0.3);
       border-radius: 3px;
     }
-
     .signature-canvas {
       touch-action: none;
     }
-
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.7; transform: scale(1.2); }
     }
-
     .animate-pulse-dot {
       animation: pulse-dot 1.5s ease-in-out infinite;
     }
-
     @keyframes slide-in {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     .animate-slide-in {
       animation: slide-in 0.3s ease-out;
     }
 
+    /* Print styles */
     @media print {
-      @page { margin: 1cm; }
-      body * { visibility: hidden !important; }
-      #print-area, #print-area * { visibility: visible !important; }
-      #print-area {
-        position: absolute !important;
-        left: 0; top: 0;
-        width: 100%;
+      @page {
+        margin: 1cm;
       }
-      .no-print { display: none !important; }
+
+      body * { 
+        visibility: hidden !important; 
+      }
+
+      #print-area, #print-area * { 
+        visibility: visible !important; 
+      }
+
+      #print-area { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 100% !important; 
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .no-print { 
+        display: none !important; 
+        visibility: hidden !important;
+      }
     }
   </style>
-</head>
-
-<body class="bg-slate-900 text-slate-100">
-  <div id="app"></div>
-
-  <!-- Main App Script -->
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full bg-slate-900 text-slate-100 overflow-auto">
+  <div id="app" class="min-h-full w-full"><!-- Header -->
+   <header class="no-print bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+     <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+        <svg class="w-6 h-6 text-slate-900" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+       </div>
+       <div>
+        <h1 id="app-title" class="text-xl font-bold text-white">Werkstatt Auftragsmanager</h1>
+        <p id="company-name" class="text-sm text-slate-400">Ihre Werkstatt</p>
+       </div>
+      </div><button id="new-job-btn" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+       </svg> Neuer Auftrag </button>
+     </div>
+    </div>
+   </header><!-- Main Content -->
+   <main class="max-w-7xl mx-auto px-4 py-6"><!-- Stats Overview -->
+    <div id="stats-section" class="no-print grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+       </div>
+       <div>
+        <p class="text-2xl font-bold text-white" id="stat-total">0</p>
+        <p class="text-sm text-slate-400">Aufträge gesamt</p>
+       </div>
+      </div>
+     </div>
+     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+       </div>
+       <div>
+        <p class="text-2xl font-bold text-white" id="stat-open">0</p>
+        <p class="text-sm text-slate-400">Offen</p>
+       </div>
+      </div>
+     </div>
+     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+       </div>
+       <div>
+        <p class="text-2xl font-bold text-white" id="stat-done">0</p>
+        <p class="text-sm text-slate-400">Erledigt</p>
+       </div>
+      </div>
+     </div>
+     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+       </div>
+       <div>
+        <p class="text-2xl font-bold text-white" id="stat-active">0</p>
+        <p class="text-sm text-slate-400">Aktive Arbeiten</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- View Toggle -->
+    <div class="no-print flex gap-2 mb-4"><button id="view-list-btn" class="bg-amber-500 text-slate-900 font-medium px-4 py-2 rounded-lg transition-colors"> Auftragsliste </button> <button id="view-detail-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition-colors hidden"> Auftragsdetails </button>
+    </div><!-- Job List View -->
+    <div id="job-list-view" class="no-print">
+     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+      <div class="p-4 border-b border-slate-700 flex items-center justify-between">
+       <h2 class="text-lg font-semibold text-white">Aufträge</h2>
+       <div class="flex gap-2"><select id="filter-status" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-slate-200"> <option value="all">Alle Status</option> <option value="open">Offen</option> <option value="done">Erledigt</option> </select>
+       </div>
+      </div>
+      <div id="job-list" class="divide-y divide-slate-700 max-h-[500px] overflow-y-auto custom-scrollbar">
+       <div class="p-8 text-center text-slate-500">
+        <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p>Keine Aufträge vorhanden</p>
+        <p class="text-sm mt-1">Erstellen Sie einen neuen Auftrag um zu beginnen</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Job Detail View -->
+    <div id="job-detail-view" class="hidden"><!-- Print Area - wird beim Drucken angezeigt -->
+     <div id="print-area" style="display: none;"><!-- Wird dynamisch beim Drucken gefüllt -->
+     </div><!-- Normal View (no-print) -->
+     <div class="no-print grid grid-cols-1 lg:grid-cols-3 gap-6"><!-- Left Column - Job Info -->
+      <div class="lg:col-span-2 space-y-6"><!-- Job Header Card -->
+       <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <div class="flex items-start justify-between mb-4">
+         <div>
+          <h2 id="detail-title" class="text-2xl font-bold text-white">Auftragstitel</h2>
+          <p id="detail-created" class="text-sm text-slate-400 mt-1">Erstellt: --</p>
+         </div><span id="detail-status-badge" class="px-3 py-1 rounded-full text-sm font-medium bg-amber-500/20 text-amber-400"> Offen </span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+         <div>
+          <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Kunde</p>
+          <p id="detail-customer" class="text-slate-200 font-medium">--</p>
+         </div>
+         <div>
+          <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Fahrzeug</p>
+          <p id="detail-vehicle" class="text-slate-200 font-medium">--</p>
+         </div>
+         <div>
+          <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Kennzeichen</p>
+          <p id="detail-plate" class="text-slate-200 font-medium">--</p>
+         </div>
+        </div>
+        <div class="flex gap-2 mt-6"><button id="close-job-btn" class="bg-green-600 hover:bg-green-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg> Abschliessen </button> <button id="export-pdf-btn" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-900 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2" onclick="tryPrint()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg> Drucken / PDF </button> <!-- Print Fallback Hinweis -->
+         <div id="print-fallback" class="hidden mt-3 p-3 bg-amber-500/20 border border-amber-500/30 rounded-lg">
+          <p class="text-sm text-amber-400 font-medium">💡 Tipp: Verwenden Sie <strong>Strg+P</strong> (Windows) oder <strong>Cmd+P</strong> (Mac) zum Drucken</p>
+         </div><button id="back-to-list-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition-colors"> ← Zurück zur Liste </button>
+        </div>
+       </div><!-- Time Tracking Card -->
+       <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+         <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg> Zeiterfassung</h3><!-- Start New Entry -->
+        <div id="time-entry-form" class="bg-slate-700/50 rounded-lg p-4 mb-4">
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="block text-xs text-slate-400 mb-1">Mitarbeiter</label> <select id="worker-select" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-slate-200"> <option>Esteban</option> <option>Eron</option> <option>Jeremie</option> <option>Tsvetan</option> <option>Mensel</option> </select>
+          </div>
+          <div><label class="block text-xs text-slate-400 mb-1">Aufgabe</label> <select id="task-select" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-slate-200"> <option>Service</option> <option>Diagnose</option> <option>Bremsen</option> <option>Reifen</option> <option>MFK</option> <option>Elektrik</option> <option>Klima</option> <option>Probefahrt</option> <option>Sonstiges</option> </select>
+          </div>
+          <div class="flex items-end"><button id="start-timer-btn" class="w-full bg-green-600 hover:bg-green-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg> Starten </button>
+          </div>
+         </div>
+        </div><!-- Running Timer Display -->
+        <div id="running-timer" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-4 animate-slide-in">
+         <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3"><span class="w-3 h-3 bg-amber-500 rounded-full animate-pulse-dot"></span>
+           <div>
+            <p class="font-medium text-amber-400"><span id="running-worker">--</span> - <span id="running-task">--</span></p>
+            <p class="text-sm text-slate-400">Gestartet: <span id="running-start">--</span></p>
+           </div>
+          </div>
+          <div class="flex items-center gap-3"><span id="running-duration" class="text-2xl font-bold text-white">00:00</span> <button id="stop-timer-btn" class="bg-red-600 hover:bg-red-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+            </svg> Stoppen </button>
+          </div>
+         </div>
+        </div><!-- Time Entries List -->
+        <div id="time-entries" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+         <p class="text-slate-500 text-center py-4">Keine Zeiteinträge vorhanden</p>
+        </div><!-- Time Summary -->
+        <div id="time-summary" class="mt-4 pt-4 border-t border-slate-700 hidden">
+         <div class="flex items-center justify-between"><span class="text-slate-400">Gesamtzeit:</span> <span id="total-time" class="text-xl font-bold text-amber-400">0h 0min</span>
+         </div>
+         <div id="worker-totals" class="mt-2 space-y-1"></div>
+        </div>
+       </div><!-- Signature Card -->
+       <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+         <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+         </svg> Kundenunterschrift</h3>
+        <div id="signature-display" class="hidden mb-4">
+         <div class="bg-white rounded-lg p-4"><img id="signature-image" src="" alt="Unterschrift" class="max-h-32 mx-auto">
+         </div>
+         <p class="text-sm text-slate-400 mt-2">Unterschrieben von: <span id="signed-by" class="text-slate-200">--</span> am <span id="signed-at" class="text-slate-200">--</span></p>
+        </div>
+        <div id="signature-form" class="block">
+         <div class="mb-3"><label class="block text-sm text-slate-400 mb-2">Name des Unterzeichners</label> <input type="text" id="signer-name" placeholder="Vollständiger Name" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none">
+         </div>
+         <div class="mb-4"><label class="block text-sm text-slate-400 mb-2">Unterschrift (bitte in das Feld zeichnen)</label>
+          <div class="w-full bg-white rounded-lg border-2 border-slate-300 p-0 overflow-hidden">
+           <canvas id="signature-canvas" class="signature-canvas bg-white cursor-crosshair w-full block" style="height: 400px;"></canvas>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">👆 Zeichnen Sie mit Maus oder Finger im weißen Bereich</p>
+         </div>
+         <div class="flex gap-2"><button id="clear-signature-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+           </svg> Löschen </button> <button id="save-signature-btn" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg> Unterschrift speichern </button>
+         </div>
+        </div>
+       </div>
+      </div><!-- Right Column - QR & Actions -->
+      <div class="space-y-6"><!-- QR Code Card -->
+       <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+         <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+         </svg> Auftrags-QR</h3>
+        <div class="bg-white rounded-lg p-4 flex items-center justify-center">
+         <div id="qr-placeholder" class="w-40 h-40 bg-slate-100 rounded flex items-center justify-center">
+          <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+         </div>
+        </div>
+        <p class="text-xs text-slate-500 text-center mt-3">QR-Code für schnellen Zugriff</p>
+       </div><!-- Actions Card -->
+       <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Aktionen</h3>
+        <div class="space-y-2"><button id="edit-job-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-3 rounded-lg transition-colors flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg> Auftrag bearbeiten </button> <button id="delete-job-btn" class="w-full bg-slate-700 hover:bg-red-600 text-slate-200 hover:text-white font-medium px-4 py-3 rounded-lg transition-colors flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg> Auftrag löschen </button>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- Ende no-print Container -->
+   </main>
+  </div><!-- Ende job-detail-view --> <!-- New Job Modal -->
+  <div id="new-job-modal" class="no-print fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-lg animate-slide-in">
+    <div class="p-6 border-b border-slate-700">
+     <h2 class="text-xl font-bold text-white">Neuer Auftrag</h2>
+    </div>
+    <div class="p-6 space-y-4">
+     <div><label class="block text-sm text-slate-400 mb-1">Auftragstitel *</label> <input type="text" id="new-job-title" placeholder="z.B. Service 40'000km" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none">
+     </div>
+     <div><label class="block text-sm text-slate-400 mb-1">Kunde</label> <input type="text" id="new-job-customer" placeholder="Kundenname" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none">
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div><label class="block text-sm text-slate-400 mb-1">Fahrzeug</label> <input type="text" id="new-job-vehicle" placeholder="Marke / Modell" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none">
+      </div>
+      <div><label class="block text-sm text-slate-400 mb-1">Kennzeichen</label> <input type="text" id="new-job-plate" placeholder="ZH 123456" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none">
+      </div>
+     </div>
+    </div>
+    <div class="p-6 border-t border-slate-700 flex gap-3 justify-end"><button id="cancel-new-job-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-5 py-2.5 rounded-lg transition-colors"> Abbrechen </button> <button id="save-new-job-btn" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-medium px-5 py-2.5 rounded-lg transition-colors"> Erstellen </button>
+    </div>
+   </div>
+  </div><!-- Edit Job Modal -->
+  <div id="edit-job-modal" class="no-print fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-lg animate-slide-in">
+    <div class="p-6 border-b border-slate-700">
+     <h2 class="text-xl font-bold text-white">Auftrag bearbeiten</h2>
+    </div>
+    <div class="p-6 space-y-4">
+     <div><label class="block text-sm text-slate-400 mb-1">Auftragstitel *</label> <input type="text" id="edit-job-title" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+     </div>
+     <div><label class="block text-sm text-slate-400 mb-1">Kunde</label> <input type="text" id="edit-job-customer" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div><label class="block text-sm text-slate-400 mb-1">Fahrzeug</label> <input type="text" id="edit-job-vehicle" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+      </div>
+      <div><label class="block text-sm text-slate-400 mb-1">Kennzeichen</label> <input type="text" id="edit-job-plate" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+      </div>
+     </div>
+    </div>
+    <div class="p-6 border-t border-slate-700 flex gap-3 justify-end"><button id="cancel-edit-job-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-5 py-2.5 rounded-lg transition-colors"> Abbrechen </button> <button id="save-edit-job-btn" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-medium px-5 py-2.5 rounded-lg transition-colors"> Speichern </button>
+    </div>
+   </div>
+  </div><!-- Delete Confirmation Modal -->
+  <div id="delete-confirm-modal" class="no-print fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md animate-slide-in">
+    <div class="p-6">
+     <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+     </div>
+     <h3 class="text-lg font-bold text-white text-center mb-2">Auftrag löschen?</h3>
+     <p class="text-slate-400 text-center text-sm">Dieser Vorgang kann nicht rückgängig gemacht werden. Alle zugehörigen Zeiteinträge werden ebenfalls gelöscht.</p>
+    </div>
+    <div class="p-6 border-t border-slate-700 flex gap-3 justify-end"><button id="cancel-delete-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-5 py-2.5 rounded-lg transition-colors"> Abbrechen </button> <button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-500 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"> Löschen </button>
+    </div>
+   </div>
+  </div><!-- Toast Notification -->
+  <div id="toast" class="no-print fixed bottom-4 right-4 bg-slate-700 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-md"><span id="toast-message">Nachricht</span>
+  </div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
